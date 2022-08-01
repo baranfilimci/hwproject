@@ -1,0 +1,20 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:form="sap.ui.layout.form">
+    <Dialog title="{i18n>createUser}" afterClose="onACDialog">
+        <content>
+            <form:SimpleForm>
+                <form:content>
+                    <core:Title text="{i18n>userInformation}" />
+                    <Label text="{i18n>username}" required="true" />
+                    <Input value="{model>/Username}" maxLength="12" />
+                </form:content>
+            </form:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button text="{i18n>delete}" type="Emphasized" press="onDeleteUser" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="onACDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>
