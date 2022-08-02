@@ -3,7 +3,7 @@
         <content>
             <form:SimpleForm>
                 <form:content>
-                    <Title text="{i18n>userInformation}" />
+                    <Title text="{i18n>updateUser}" />
                     <Label text="{i18n>username}" required="true" />
                     <Input value="{model>/Username}" editable="true" maxLength= "40"/>
                     <Label text="{i18n>name}" />

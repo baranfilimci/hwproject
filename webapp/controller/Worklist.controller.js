@@ -9,12 +9,10 @@ sap.ui.define([
     "sap/ui/model/Sorter",
     "sap/ui/Device",
     'sap/ui/export/Spreadsheet',
-    'sap/ui/export/library',
+    
 
-], function (BaseController, JSONModel, formatter, Filter, FilterOperator, Device, Sorter, Fragment, exportLibrary, Spreadsheet) {
+], function (BaseController, JSONModel, formatter, Filter, FilterOperator, Device, Sorter, Fragment, Spreadsheet) {
     "use strict";
-    let EdmType = exportLibrary.EdmType;
-
     return BaseController.extend("com.ntt.sm.hwproject.controller.Worklist", {
 
         formatter: formatter,
@@ -41,11 +39,12 @@ sap.ui.define([
             this.oDialog.destroy();
             this.oDialog = null;
         },
+        
         generateUserName: function(){
             let fname=this.getModel("model").getProperty("/Name").charAt(0).toUpperCase();
             let lname=this.getModel("model").getProperty("/Surname").toUpperCase();
             let result=fname+lname;
-            this.getModel("model").getProperty("/Username")==result;
+            this.getModel("model").setProperty("/Username", result);
             
         },
         onCreateUser: function () {
@@ -62,7 +61,9 @@ sap.ui.define([
                 .then((oResponse) => {
                 })
                 .catch(() => { })
-                .finally(() => { });
+                .finally(() => { 
+                    
+                });
         },
         onDeleteUser: function () {
             const oModel = this.getModel("model").getProperty("/");
@@ -73,8 +74,8 @@ sap.ui.define([
                 .then(() => { })
                 .catch(() => { })
                 .finally(() => {
-                    onACDialog();
                 });
+        
         },
         onUpdateUser: function () {
 			
@@ -216,18 +217,15 @@ sap.ui.define([
 
 
         onSearch: function (oEvent) {
-            if (oEvent.getParameters().refreshButtonPressed) {
-
-                this.onRefresh();
-            } else {
-                var aTableSearchState = [];
+          
+                var afilter = [];
                 var sQuery = oEvent.getParameter("query");
 
                 if (sQuery && sQuery.length > 0) {
                     aTableSearchState = [new Filter("Username", FilterOperator.Contains, sQuery)];
                 }
                 this._applySearch(aTableSearchState);
-            }
+            
 
         },
 
