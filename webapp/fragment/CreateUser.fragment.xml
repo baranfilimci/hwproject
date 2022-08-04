@@ -4,12 +4,12 @@
             <form:SimpleForm>
                 <form:content>
                     <Title text="{i18n>userInformation}" />
-                    <Label  text="{i18n>username}" required="true" />
-                    <Input value="{model>/Username}" id="usernameinput" editable="true" maxLength="40" required="true"/>
                     <Label text="{i18n>name}" />
-                    <Input value="{model>/Name}" id="nameinput" maxLength="40" required="true" />
+                    <Input value="{model>/Name}" id="nameinput" maxLength="40" required="true" liveChange="generateUserName" />
                     <Label text="{i18n>surname}" />
-                    <Input value="{model>/Surname}"  id="surnameinput" maxLength="40" change="generateUserName" />
+                    <Input value="{model>/Surname}" id="surnameinput" maxLength="40" required="true" liveChange="generateUserName" />
+                    <Label text="{i18n>username}" required="true" />
+                    <Input value="{model>/Username}" id="usernameinput" editable="false" maxLength="40" required="true" />
                     <Label text="{i18n>birthdate}" />
                     <DatePicker displayFormat="short" value="{ path:'model>/Birthdate', type:'sap.ui.model.type.Date', formatOptions: { UTC:true } }" />
                     <Label text="{i18n>mail}" />
@@ -20,7 +20,7 @@
 
         </content>
         <beginButton>
-            <Button text="{i18n>save}" press="onCreateUser "/> 
+            <Button text="{i18n>save}" press="onCreateUser " />
         </beginButton>
         <endButton>
             <Button text="{i18n>cancel}" press="onACDialog" />

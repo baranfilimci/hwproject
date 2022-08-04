@@ -1,0 +1,48 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:form="sap.ui.layout.form">
+    <Dialog title="{i18n>createMulti}" afterClose="onACDialog">
+        <content>
+            <Table items="{model>/Users}" mode="MultiSelect">
+                <headerToolbar>
+                    <Toolbar>
+                        <Button text="{i18n>add}" press="onAddUser" />
+                        <Button text="{i18n>deletelastrow}" press="onDeleteUser" />
+                    </Toolbar>
+                </headerToolbar>
+                <columns>
+                    <Column>
+                        <Label text="{i18n>username}" design="Bold" />
+                    </Column>
+                    <Column>
+                        <Label text="{i18n>name}" design="Bold" />
+                    </Column>
+                    <Column>
+                        <Label text="{i18n>surname}" design="Bold" />
+                    </Column>
+                    <Column>
+                        <Label text="{i18n>birthdate}" design="Bold" />
+                    </Column>
+                    <Column>
+                        <Label text="{i18n>mail}" design="Bold" />
+                    </Column>
+                </columns>
+                <items>
+                    <ColumnListItem>
+                        <cells>
+                            <Input value="{model>Username}" maxLength="12" required="true" />
+                            <Input value="{model>Name}" maxLength="40" />
+                            <Input value="{model>Surname}" maxLength="40" />
+                            <DatePicker value="{ path:'model>Birthdate', type:'sap.ui.model.type.Date', formatOptions: { UTC:true } }" />
+                            <Input value="{model>Mail}" maxLength="241" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </content>
+        <beginButton>
+            <Button text="{i18n>save}" press="onCreateMultiUser " />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="onACDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

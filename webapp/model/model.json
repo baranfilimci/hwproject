@@ -3,5 +3,6 @@
     "Name":"",
     "Surname":"",
     "Birthdate": null,
-    "Mail":"@gmail.com"
+    "Mail":"@gmail.com",
+    "Users": []
 }

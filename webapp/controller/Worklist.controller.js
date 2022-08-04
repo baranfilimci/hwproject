@@ -2,32 +2,28 @@ sap.ui.define([
     "./BaseController",
     "sap/ui/model/json/JSONModel",
     "../model/formatter",
-    "sap/m/MessageBox",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-    "sap/ui/core/Fragment",
-    "sap/ui/model/Sorter",
     "sap/ui/Device",
+    "sap/ui/model/Sorter",
+    "sap/ui/core/Fragment",
     'sap/ui/export/Spreadsheet',
-    
-
-], function (BaseController, JSONModel, formatter, Filter, FilterOperator, Device, Sorter, Fragment, Spreadsheet) {
+    'sap/ui/export/library'
+], function (BaseController, JSONModel, formatter, Filter, FilterOperator, Device, Sorter, Fragment, Spreadsheet, exportLibrary) {
     "use strict";
+    let EdmType = exportLibrary.EdmType;
     return BaseController.extend("com.ntt.sm.hwproject.controller.Worklist", {
 
         formatter: formatter,
 
-        
         onInit: function () {
             var oViewModel;
             this._mViewSettingsDialogs = {};
-            
+
             this._aTableSearchState = [];
 
             oViewModel = new JSONModel({
                 worklistTableTitle: this.getResourceBundle().getText("worklistTableTitle"),
-                shareSendEmailSubject: this.getResourceBundle().getText("shareSendEmailWorklistSubject"),
-                shareSendEmailMessage: this.getResourceBundle().getText("shareSendEmailWorklistMessage", [location.href]),
                 tableNoDataText: this.getResourceBundle().getText("tableNoDataText")
             });
             this.setModel(oViewModel, "worklistView");
@@ -39,13 +35,26 @@ sap.ui.define([
             this.oDialog.destroy();
             this.oDialog = null;
         },
-        
-        generateUserName: function(){
-            let fname=this.getModel("model").getProperty("/Name").charAt(0).toUpperCase();
-            let lname=this.getModel("model").getProperty("/Surname").toUpperCase();
-            let result=fname+lname;
-            this.getModel("model").setProperty("/Username", result);
-            
+
+        generateUserName: function () {
+            const oModel = this.getModel("model");
+            const sName = oModel.getProperty("/Name");
+            const sSurname = oModel.getProperty("/Surname");
+            const aContexts = this.byId("table").getBinding("items").getContexts();
+            let aUsernames = [];
+            let sUsername = "";
+            if (sName !== "" && sSurname !== "") {
+                sUsername = sName.charAt(0).toLocaleUpperCase() + sSurname.toLocaleUpperCase();
+                aContexts.forEach(oContext => {
+                    aUsernames.push(this.getModel().getProperty(oContext.getPath() + "/Username"));
+                });
+                if (aUsernames.filter(xUsername => xUsername === sUsername).length !== 0) {
+                    sUsername = sUsername + (+aUsernames
+                        .filter(xUsername => xUsername.includes(sUsername))[aUsernames.filter(xUsername => xUsername.includes(sUsername)).length - 1]
+                        .match(/\d/g).toString().replaceAll(",", "") + 1);
+                }
+            }
+            oModel.setProperty("/Username", sUsername);
         },
         onCreateUser: function () {
             const oUserInformation = this.getModel("model").getProperty("/");
@@ -61,8 +70,7 @@ sap.ui.define([
                 .then((oResponse) => {
                 })
                 .catch(() => { })
-                .finally(() => { 
-                    
+                .finally(() => {
                 });
         },
         onDeleteUser: function () {
@@ -75,30 +83,77 @@ sap.ui.define([
                 .catch(() => { })
                 .finally(() => {
                 });
-        
+
         },
         onUpdateUser: function () {
-			
-			const oModel = this.getModel("model").getProperty("/");
-			const oKey = this.getModel().createKey("/UserInformationSet", {
-				Username: oModel.Username
-			});
+
+            const oModel = this.getModel("model").getProperty("/");
+            const oKey = this.getModel().createKey("/UserInformationSet", {
+                Username: oModel.Username
+            });
             let oData = {};
 
             oData.Username = oModel.Username
             oData.Name = oModel.Name
-            oData.Surname  = oModel.Surname
+            oData.Surname = oModel.Surname
             oData.Birthdate = oModel.Birthdate
             oData.Mail = oModel.Mail
 
-			this.onUpdate(oKey, oData, this.getModel())
-				.then((oResponse) => {})
-				.catch(() => {})
-				.finally(() => {
+            this.onUpdate(oKey, oData, this.getModel())
+                .then((oResponse) => { })
+                .catch(() => { })
+                .finally(() => {
                     this.onRefresh();
                 });
-		},
+        },
+        onReadFunction: function () {
+			const oModel = this.getModel("model").getProperty("/");
+			const oKey = this.getModel().createKey("/UserInformationSet", {
+				Username:oModel.Username
+			});
 
+			this.onRead(oKey, this.getModel())
+				.then((oData) => {})
+				.catch(() => {})
+				.finally(() => {});
+		},
+        onAddUser: function () {
+            const oModel = this.getModel("model");
+            const aUsers = oModel.getProperty("/Users");
+        
+            aUsers.push({
+                Username: "",
+                Name: "",
+                Surname: "",
+                Birthdate: null,
+                Mail: "@gmail.com"
+            });
+        
+            oModel.setProperty("/Users", aUsers);
+        },
+        onDeleteUser: function () {
+            const oModel = this.getModel("model");
+            const aUsers = oModel.getProperty("/Users");
+            aUsers.pop();
+            oModel.setProperty("/Users", aUsers);
+        },
+        onCreateMultiUser: function(){
+            const aUserInformations = this.getModel("model").getProperty("/Users");
+            const oUserInformartionData = {
+                Username: "X",
+                UserInformationItems: aUserInformations
+            };
+        
+            this.onCreate("/UserInformationSet", oUserInformartionData, this.getModel())
+                .then((oResponse) => {
+                    MessageToast.show(sap.ui.getCore().getMessageManager().getMessageModel().getData()[0].message);
+                })
+                .catch((oError) => {
+        
+                })
+                .finally(() => {
+                });
+        },
         onShowCreateDialog: function () {
             this.oDialog = sap.ui.xmlfragment(this.getView().getId(), "com.ntt.sm.hwproject.fragment.CreateUser", this);
             this.getView().addDependent(this.oDialog);
@@ -111,6 +166,16 @@ sap.ui.define([
         },
         onShowUpdateDialog: function () {
             this.oDialog = sap.ui.xmlfragment(this.getView().getId(), "com.ntt.sm.hwproject.fragment.UpdateUser", this);
+            this.getView().addDependent(this.oDialog);
+            this.oDialog.open();
+        },
+        onShowReadDialog: function () {
+            this.oDialog = sap.ui.xmlfragment(this.getView().getId(), "com.ntt.sm.hwproject.fragment.ReadUser", this);
+            this.getView().addDependent(this.oDialog);
+            this.oDialog.open();
+        },
+        onShowMultiDialog: function () {
+            this.oDialog = sap.ui.xmlfragment(this.getView().getId(), "com.ntt.sm.hwproject.fragment.CreateMulti", this);
             this.getView().addDependent(this.oDialog);
             this.oDialog.open();
         },
@@ -139,13 +204,13 @@ sap.ui.define([
                 });
         },
         handleSortDialogConfirm: function (oEvent) {
-            var oTable = this.byId("table"),
+            let oTable = this.byId("table"),
                 mParams = oEvent.getParameters(),
                 oBinding = oTable.getBinding("items"),
                 sPath,
-                bDescending,
-                aSorters = [];
-
+                bDescending;
+            let aSorters=[];
+            
             sPath = mParams.sortItem.getKey();
             bDescending = mParams.sortDescending;
             aSorters.push(new Sorter(sPath, bDescending));
@@ -171,61 +236,70 @@ sap.ui.define([
         onNavBack: function () {
             history.go(-1);
         },
-        createColumnConfig: function() {
-			return [
-				{
-					label: 'Username',
-					property: 'Username',
-					scale: 0
-				},
-				{
-					label: 'Firstname',
-					property: 'Name',
-					width: '25'
-				},
-				{
-					label: 'Lastname',
-					property: 'Lastname',
-					width: '25'
-				},
-				{
-					label: 'Birthdate',
-					property: 'Birthdate',
-					
-					width: '18'
-				},
-			];
-		},
+        createColumnConfig: function () {
+            let aCols = [];
 
-		onExport: function() {
-			var aCols, aProducts, oSettings, oSheet;
+            aCols.push({
+                label: 'Username',
+                property: 'Username'
+            });
 
-			aCols = this.createColumnConfig();
-			aProducts = this.getView().getModel().getProperty('/');
+            aCols.push({
+                label: 'Name',
+                property: 'Name'
+            });
 
-			oSettings = {
-				workbook: { columns: aCols },
-				dataSource: aProducts,
-                worker: false
-			};
+            aCols.push({
+                label: 'Surname',
+                property: 'Surname'
+            });
 
-			oSheet = new Spreadsheet(oSettings);
-			oSheet.build()
-				.then(() => {})
-				.finally(oSheet.destroy);
-		},
+            aCols.push({
+                label: 'Birthdate',
+                property: 'Birthdate',
+                type:EdmType.Date,
+            });
+
+
+            aCols.push({
+                label: 'Mail',
+                property: 'Mail'
+            });
+
+            return aCols;
+        },
+
+        onExport: function () {
+            let aCols, oSettings, oSheet;
+            let aData=[];
+            const aContexts = this.byId("table").getBinding("items").getContexts();
+            aContexts.forEach(oContext => {
+                aData.push(this.getModel().getProperty(oContext.getPath() + "/"));
+            });
+            aCols = this.createColumnConfig();
+            oSettings = {
+                workbook: { columns: aCols},
+                dataSource: aData,
+                fileName: 'Table export.xlsx',
+            };
+
+            oSheet = new Spreadsheet(oSettings);
+            oSheet.build()
+                .then(() => { })
+                .finally(oSheet.destroy);
+        },
 
 
         onSearch: function (oEvent) {
-          
-                var afilter = [];
-                var sQuery = oEvent.getParameter("query");
 
-                if (sQuery && sQuery.length > 0) {
-                    aTableSearchState = [new Filter("Username", FilterOperator.Contains, sQuery)];
-                }
-                this._applySearch(aTableSearchState);
-            
+            var afilter = [];
+            var sQuery = oEvent.getParameter("query");
+
+            if (sQuery && sQuery.length > 0) {
+                aTableSearchState = [new Filter("Username", FilterOperator.Contains, sQuery)];
+            }
+            this._applySearch(aTableSearchState);
+
 
         },
 

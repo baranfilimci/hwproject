@@ -1,0 +1,20 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:form="sap.ui.layout.form">
+    <Dialog title="{i18n>readUser}" afterClose="onACDialog">
+        <content>
+            <form:SimpleForm>
+                <form:content>
+                    <core:Title text="{i18n>readUser}" />
+                    <Label text="{i18n>username}" required="true" />
+                    <Input value="{model>/Username}" maxLength="12" />
+                </form:content>
+            </form:SimpleForm>
+        </content>
+
+        <beginButton>
+            <Button text="{i18n>read}" type="Emphasized" press="onReadFunction" />
+        </beginButton>
+        <endButton>
+            <Button text="{i18n>cancel}" press="onACDialog" />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

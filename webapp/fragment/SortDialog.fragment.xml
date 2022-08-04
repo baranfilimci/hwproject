@@ -4,8 +4,8 @@
 	<ViewSettingsDialog
 		confirm="handleSortDialogConfirm">
 		<sortItems>
-			<ViewSettingsItem text="UserName" key="Username" selected="true" />
-			<ViewSettingsItem text="Name and Surname" key="Name" />
+			<ViewSettingsItem text="Username" key="Username" selected="true" />
+			<ViewSettingsItem text="Name" key="Name" />
 			<ViewSettingsItem text="Birthdate" key="Birthdate" />
 		</sortItems>
 	</ViewSettingsDialog>

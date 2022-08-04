@@ -27,15 +27,15 @@ sap.ui.define([
         getResourceBundle : function () {
             return this.getOwnerComponent().getModel("i18n").getResourceBundle();
         },
-
-        onShareEmailPress : function () {
-            var oViewModel = (this.getModel("objectView") || this.getModel("worklistView"));
-            URLHelper.triggerEmail(
-                null,
-                oViewModel.getProperty("/shareSendEmailSubject"),
-                oViewModel.getProperty("/shareSendEmailMessage")
-            );
-        },
+        onRead: function (sSet, oModel) {
+			return new Promise(function (fnSuccess, fnReject) {
+				const mParameters = {
+					success: fnSuccess,
+					error: fnReject
+				};
+				oModel.read(sSet, mParameters);
+			});
+		},
         onCreate: function (sSet, oData, oModel) {
             return new Promise(function (fnSuccess, fnReject) {
                 const mParameters = {
